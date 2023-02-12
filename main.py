@@ -2,6 +2,35 @@ import requests
 import spacy
 import nltk; nltk.download('popular') 
 from nltk.corpus import wordnet
+from PIL import Image, ImageDraw, ImageFont
+import io
+from os.path import abspath, dirname, join
+
+
+
+def save_image(content):
+    img = Image.new('RGB', (1920, 1080), (255, 255, 255))
+    d = ImageDraw.Draw(img)
+    current_words = []
+    x,y = 0,20
+    for word in content.split():
+        current_words.append(word)
+        left, top, right, bottom= d.textbbox((x,y),' '.join(current_words))
+        if current_words and right>=1920:
+            d.text((20+bottom-top,20),' '.join(current_words[:-1]), fill=(0,0,0))
+            current_words = [-1]
+            x+=(bottom-top+20)
+        else:
+            current_words =[current_words[-1]]
+    d.text((20+bottom-top,20),' '.join(current_words), fill=(0,0,0))
+
+
+    #d.text((20,20), content, fill=(255,0,0))
+
+    path = join(dirname(abspath(__file__)), "image.png")
+    img.save(path)
+
+
 
 nlp = spacy.load('en_core_web_sm', disable=['parser', 'ner'])
 
@@ -81,4 +110,4 @@ for word in words:
 print(' '.join(result))
 
 # https://stackoverflow.com/questions/17856242/how-to-convert-a-string-to-an-image
-
+save_image(' '.join(result))
